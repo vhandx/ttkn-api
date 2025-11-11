@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgis:
+    image: postgis
+    environment:
+      POSTGRES_DB: postgis
+      POSTGRES_USER: postgis
+      POSTGRES_PASSWORD: postgis
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    ports:
+      - "8888:8888"
+    depends_on:
+      - postgis
+    environment:
+      - DATABASE_URL=postgres://postgis:postgis@postgis:5432/postgis?sslmode=disable
+
+volumes:
+  postgres_data:
