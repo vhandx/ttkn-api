@@ -45,6 +45,7 @@ type TtknAll struct {
 	CnTTKN   string `json:"cnTTKN"`
 	NangSuat string `json:"nangSuat"`
 	SanLuong string `json:"sanLuong"`
+	TenXaMoi string `json:"tenXaMoi"`
 }
 
 type Ttkn struct {
@@ -56,13 +57,15 @@ type Ttkn struct {
 }
 
 type TtknR struct {
-	Id       string  `json:"id"`
-	TenHuyen string  `json:"tenHuyen"`
-	TenTinh  string  `json:"tenTinh"`
-	DtTtkn   float64 `json:"dtTTKN"`
-	CnTTKN   string  `json:"cnTTKN"`
-	NangSuat float64 `json:"nangSuat"`
-	SanLuong float64 `json:"sanLuong"`
+	Id       string   `json:"id"`
+	TenHuyen string   `json:"tenHuyen"`
+	TenTinh  string   `json:"tenTinh"`
+	DtTtkn   *float64 `json:"dtTTKN"`
+	DtTtknTn *float64 `json:"dtTTKNTN"`
+	CnTTKN   *string  `json:"cnTTKN"`
+	NangSuat *float64 `json:"nangSuat"`
+	SanLuong *float64 `json:"sanLuong"`
+	TenXaMoi *string  `json:"tenXaMoi"`
 }
 
 type TtknHt struct {
@@ -73,6 +76,7 @@ type TtknHt struct {
 	CnTTKN   string `json:"cnTTKN"`
 	NangSuat string `json:"nangSuat"`
 	SanLuong string `json:"sanLuong"`
+	TenXaMoi string `json:"tenXaMoi"`
 }
 
 type TtknTn struct {
@@ -80,6 +84,7 @@ type TtknTn struct {
 	TenHuyen string  `json:"tenHuyen"`
 	TenTinh  string  `json:"tenTinh"`
 	DtTtknTn float64 `json:"dtTTKNTN"`
+	TenXaMoi string  `json:"tenXaMoi"`
 }
 
 type TtknAdd struct {
@@ -91,6 +96,7 @@ type TtknAdd struct {
 	CnTtkn   string `json:"cnTTKN"`
 	NangSuat string `json:"nangSuat"`
 	SanLuong string `json:"sanLuong"`
+	TenXaMoi string `json:"tenXaMoi"`
 	Geometry struct {
 		Type        string        `json:"type"`
 		Coordinates [][][]float64 `json:"coordinates"`
@@ -333,32 +339,35 @@ func getArticleByIdHandler(w http.ResponseWriter, r *http.Request) {
 func ttknExcel(w http.ResponseWriter, r *http.Request) {
 
 	var sql = `
-		SELECT concat('VungTuoiTK_HienTrang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
+		SELECT concat('VungTuoiTK_HienTrang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_HienTrang_DBSH"
 		union all
-		SELECT concat('VungTuoiTK_HienTrang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
+		SELECT concat('VungTuoiTK_HienTrang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_HienTrang_DBSCL"
 		union all
-		SELECT concat('VungTuoiTK_HienTrang_DNB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
+		SELECT concat('VungTuoiTK_HienTrang_DNB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_HienTrang_DNB"
 		union all
-		SELECT concat('VungTuoiTK_HienTrang_TDMNPB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
+		SELECT concat('VungTuoiTK_HienTrang_TDMNPB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_HienTrang_TDMNPB"
 		union all
-		SELECT concat('VungTuoiTK_HienTrang_TN.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_TN"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_BTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
+		SELECT concat('VungTuoiTK_HienTrang_BTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_HienTrang_BTB"
 		union all
-		SELECT concat('VungTuoiTK_HienTrang_NTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_NTB"
+		SELECT concat('VungTuoiTK_HienTrang_NTB_TN.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+			FROM public."VungTuoiTK_HienTrang_NTB_TN"
 		union all
-		SELECT concat('VungTuoiTK_TiemNang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong"
+		SELECT concat('VungTuoiTK_TiemNang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_TiemNang_DBSCL"
 		union all
-		SELECT concat('VungTuoiTK_TiemNang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong"
+		SELECT concat('VungTuoiTK_TiemNang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong", "tenXaMoi"
 			FROM public."VungTuoiTK_TiemNang_DBSH"
+		union all
+		SELECT concat('VungTuoiTK_TiemNang_BTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong", "tenXaMoi"
+			FROM public."VungTuoiTK_TiemNang_BTB"
+		union all
+		SELECT concat('VungTuoiTK_TiemNang_NTB_TN.',id) as id, "tenHuyen", "tenTinh", "dtTTKNTN" as "dtTTKN", '' as "cnTTKN", 0 as "nangSuat", 0 as "sanLuong", "tenXaMoi"
+			FROM public."VungTuoiTK_TiemNang_NTB_TN"
 	`
 
 	rows, err := db.Query(sql)
@@ -372,7 +381,7 @@ func ttknExcel(w http.ResponseWriter, r *http.Request) {
 	var ts []TtknR
 	for rows.Next() {
 		var t TtknR
-		err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtkn, &t.CnTTKN, &t.NangSuat, &t.SanLuong)
+		err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtkn, &t.CnTTKN, &t.NangSuat, &t.SanLuong, &t.TenXaMoi)
 		if err != nil {
 			continue
 		}
@@ -385,29 +394,73 @@ func ttknExcel(w http.ResponseWriter, r *http.Request) {
 
 func ttknReports(w http.ResponseWriter, r *http.Request) {
 
-	var sql = `
-		
-		SELECT concat('VungTuoiTK_HienTrang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_DBSH"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_DBSCL"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_DNB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_DNB"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_TDMNPB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_TDMNPB"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_TN.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_TN"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_BTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_BTB"
-		union all
-		SELECT concat('VungTuoiTK_HienTrang_NTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-			FROM public."VungTuoiTK_HienTrang_NTB"
-	`
+	vars := mux.Vars(r)
+	tt := (vars["tt"])
+
+	var sql = ""
+
+	switch tt {
+	case "hienTrangDBSH":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_DBSH.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_DBSH"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "hienTrangTDMNPB":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_TDMNPB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_TDMNPB"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "hienTrangBTB":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_BTB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_BTB"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "hienTrangNTBTN":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_NTB_TN.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_NTB_TN"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "hienTrangDNB":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_DNB.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_DNB"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "hienTrangDBSCL":
+		sql = `
+			SELECT concat('VungTuoiTK_HienTrang_DBSCL.',id) as id, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi"
+				FROM public."VungTuoiTK_HienTrang_DBSCL"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "tiemNangDBSH":
+		sql = `
+			SELECT concat('VungTuoiTK_TiemNang_DBSH.',id) as id, "tenHuyen", "tenTinh", COALESCE("dtTTKNTN","dtTTKNTN",0) as "dtTTKNTN", "tenXaMoi"
+				FROM public."VungTuoiTK_TiemNang_DBSH"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "tiemNangBTB":
+		sql = `
+			SELECT concat('VungTuoiTK_TiemNang_BTB.',id) as id, "tenHuyen", "tenTinh", COALESCE("dtTTKNTN","dtTTKNTN",0) as "dtTTKNTN", "tenXaMoi"
+				FROM public."VungTuoiTK_TiemNang_BTB"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "tiemNangNTBTN":
+		sql = `
+			SELECT concat('VungTuoiTK_TiemNang_NTB_TN.',id) as id, "tenHuyen", "tenTinh", COALESCE("dtTTKNTN","dtTTKNTN",0) as "dtTTKNTN", "tenXaMoi"
+				FROM public."VungTuoiTK_TiemNang_NTB_TN"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	case "tiemNangDBSCL":
+		sql = `
+			SELECT concat('VungTuoiTK_TiemNang_DBSCL.',id) as id, "tenHuyen", "tenTinh", COALESCE("dtTTKNTN","dtTTKNTN",0) as "dtTTKNTN", "tenXaMoi"
+				FROM public."VungTuoiTK_TiemNang_DBSCL"
+			ORDER BY "tenTinh", "tenHuyen"
+		`
+	}
 
 	rows, err := db.Query(sql)
 
@@ -415,46 +468,27 @@ func ttknReports(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
+
 	defer rows.Close()
 
 	var ts []TtknR
 	for rows.Next() {
 		var t TtknR
-		err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtkn, &t.CnTTKN, &t.NangSuat, &t.SanLuong)
-		if err != nil {
-			continue
+
+		if strings.HasPrefix(tt, "tiemNang") {
+			err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtknTn, &t.TenXaMoi)
+
+			if err != nil {
+				http.Error(w, "Database error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtkn, &t.CnTTKN, &t.NangSuat, &t.SanLuong, &t.TenXaMoi)
+			if err != nil {
+				continue
+			}
 		}
-		ts = append(ts, t)
-	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(ts)
-}
-
-func ttknTnReports(w http.ResponseWriter, r *http.Request) {
-
-	var sql = `
-		SELECT concat('VungTuoiTK_TiemNang_DBSCL.',id) as id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
-			FROM public."VungTuoiTK_TiemNang_DBSCL"
-		union all
-		SELECT concat('VungTuoiTK_TiemNang_DBSH.',id) as id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
-			FROM public."VungTuoiTK_TiemNang_DBSH"
-	`
-	rows, err := db.Query(sql)
-
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var ts []Ttkn
-	for rows.Next() {
-		var t Ttkn
-		err := rows.Scan(&t.Id, &t.TenHuyen, &t.TenTinh, &t.DtTtknTn, &t.Group)
-		if err != nil {
-			continue
-		}
 		ts = append(ts, t)
 	}
 
@@ -483,24 +517,24 @@ func saveHt(w http.ResponseWriter, r *http.Request) {
 
 	switch ids[0] {
 	case "VungTuoiTK_HienTrang_TDMNPB":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_TDMNPB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_TDMNPB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	case "VungTuoiTK_HienTrang_DBSH":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_DBSH" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_DBSH" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	case "VungTuoiTK_HienTrang_BTB":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_BTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
-	case "VungTuoiTK_HienTrang_NTB":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_NTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_BTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
+	case "VungTuoiTK_HienTrang_NTB_TN":
+		sql = `UPDATE public."VungTuoiTK_HienTrang_NTB_TN" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	case "VungTuoiTK_HienTrang_TN":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_TN" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_TN" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	case "VungTuoiTK_HienTrang_DNB":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_DNB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_DNB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	case "VungTuoiTK_HienTrang_DBSCL":
-		sql = `UPDATE public."VungTuoiTK_HienTrang_DBSCL" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6 WHERE id = $7`
+		sql = `UPDATE public."VungTuoiTK_HienTrang_DBSCL" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7 WHERE id = $8`
 	}
 
-	_, err = db.Exec(sql, data.TenHuyen, data.TenTinh, data.DtTtkn, data.CnTTKN, data.NangSuat, data.SanLuong, ids[1])
+	_, err = db.Exec(sql, data.TenHuyen, data.TenTinh, data.DtTtkn, data.CnTTKN, data.NangSuat, data.SanLuong, data.TenXaMoi, ids[1])
 	if err != nil {
-		log.Println("Failed to increment view count:", err)
+		log.Println("Failed to update:", err)
 	}
 
 	// In a real application, you might want to blacklist the token
@@ -529,18 +563,18 @@ func saveTn(w http.ResponseWriter, r *http.Request) {
 
 	switch ids[0] {
 	case "VungTuoiTK_TiemNang_DBSCL":
-		sql = `UPDATE public."VungTuoiTK_TiemNang_DBSCL" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 WHERE id = $4`
+		sql = `UPDATE public."VungTuoiTK_TiemNang_DBSCL" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4 WHERE id = $5`
 	case "VungTuoiTK_TiemNang_DBSH":
-		sql = `UPDATE public."VungTuoiTK_TiemNang_DBSH" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 WHERE id = $4`
+		sql = `UPDATE public."VungTuoiTK_TiemNang_DBSH" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4 WHERE id = $5`
 	case "VungTuoiTK_TiemNang_BTB":
-		sql = `UPDATE public."VungTuoiTK_TiemNang_BTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 WHERE id = $4`
-	case "VungTuoiTK_TiemNang_NTB":
-		sql = `UPDATE public."VungTuoiTK_TiemNang_NTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 WHERE id = $4`
+		sql = `UPDATE public."VungTuoiTK_TiemNang_BTB" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4 WHERE id = $5`
+	case "VungTuoiTK_TiemNang_NTB_TN":
+		sql = `UPDATE public."VungTuoiTK_TiemNang_NTB_TN" SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4 WHERE id = $5`
 	}
 
-	_, err = db.Exec(sql, data.TenHuyen, data.TenTinh, data.DtTtknTn, ids[1])
+	_, err = db.Exec(sql, data.TenHuyen, data.TenTinh, data.DtTtknTn, data.TenXaMoi, ids[1])
 	if err != nil {
-		log.Println("Failed to increment view count:", err)
+		log.Println("Failed to update:", err)
 	}
 
 	// In a real application, you might want to blacklist the token
@@ -574,81 +608,81 @@ func saveTtkn(w http.ResponseWriter, r *http.Request) {
 	case "VungTuoiTK_HienTrang_TDMNPB":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_TDMNPB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_HienTrang_DBSH":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_DBSH" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_HienTrang_BTB":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_BTB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
-	case "VungTuoiTK_HienTrang_NTB":
+	case "VungTuoiTK_HienTrang_NTB_TN":
 		query = `
-			UPDATE public."VungTuoiTK_HienTrang_NTB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+			UPDATE public."VungTuoiTK_HienTrang_NTB_TN" 
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_HienTrang_TN":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_TN" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_HienTrang_DNB":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_DNB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_HienTrang_DBSCL":
 		query = `
 			UPDATE public."VungTuoiTK_HienTrang_DBSCL" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6
-			WHERE id = $7
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKN" = $3, "cnTTKN" = $4, "nangSuat" = $5, "sanLuong" = $6, "tenXaMoi" = $7
+			WHERE id = $8
 		`
 	case "VungTuoiTK_TiemNang_DBSH":
 		query = `
 			UPDATE public."VungTuoiTK_TiemNang_DBSH" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 
-			WHERE id = $4
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4
+			WHERE id = $5
 		`
 		t = 2
 	case "VungTuoiTK_TiemNang_BTB":
 		query = `
 			UPDATE public."VungTuoiTK_TiemNang_BTB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 
-			WHERE id = $4
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4
+			WHERE id = $5
 		`
 		t = 2
-	case "VungTuoiTK_TiemNang_NTB":
+	case "VungTuoiTK_TiemNang_NTB_TN":
 		query = `
-			UPDATE public."VungTuoiTK_TiemNang_NTB" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 
-			WHERE id = $4
+			UPDATE public."VungTuoiTK_TiemNang_NTB_TN" 
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4
+			WHERE id = $5
 		`
 		t = 2
 	case "VungTuoiTK_TiemNang_DBSCL":
 		query = `
 			UPDATE public."VungTuoiTK_TiemNang_DBSCL" 
-				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3 
-			WHERE id = $4
+				SET "tenHuyen" = $1, "tenTinh" = $2, "dtTTKNTN" = $3, "tenXaMoi" = $4 
+			WHERE id = $5
 		`
 		t = 2
 	}
 
 	switch t {
 	case 1:
-		_, err = db.Exec(query, data.TenHuyen, data.TenTinh, data.DtTtkn, data.CnTTKN, data.NangSuat, data.SanLuong, aId[1])
+		_, err = db.Exec(query, data.TenHuyen, data.TenTinh, data.DtTtkn, data.CnTTKN, data.NangSuat, data.SanLuong, data.TenXaMoi, aId[1])
 
 	case 2:
-		_, err = db.Exec(query, data.TenHuyen, data.TenTinh, data.DtTtknTn, aId[1])
+		_, err = db.Exec(query, data.TenHuyen, data.TenTinh, data.DtTtknTn, data.TenXaMoi, aId[1])
 
 	}
 
@@ -681,31 +715,30 @@ func mapTtkn(w http.ResponseWriter, r *http.Request) {
 
 	switch data.Layer {
 	case "VungTuoiTK_HienTrang_BTB":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_BTB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_BTB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_HienTrang_DBSCL":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_DBSCL" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_DBSCL" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_HienTrang_DBSH":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_DBSH" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_DBSH" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_HienTrang_DNB":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_DNB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
-	case "VungTuoiTK_HienTrang_NTB":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_NTB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_DNB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
+	case "VungTuoiTK_HienTrang_NTB_TN":
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_NTB_TN" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_HienTrang_TDMNPB":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_TDMNPB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_TDMNPB" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_HienTrang_TN":
-		query = `INSERT INTO public."VungTuoiTK_HienTrang_TN" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7)`
-
+		query = `INSERT INTO public."VungTuoiTK_HienTrang_TN" (geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5, $6, $7, $8)`
 	case "VungTuoiTK_TiemNang_BTB":
-		query = `INSERT INTO public."VungTuoiTK_TiemNang_BTB" (geom, "tenHuyen", "tenTinh", "dtTTKNTN") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4)`
+		query = `INSERT INTO public."VungTuoiTK_TiemNang_BTB" (geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5)`
 		t = 2
 	case "VungTuoiTK_TiemNang_DBSCL":
-		query = `INSERT INTO public."VungTuoiTK_TiemNang_DBSCL" (geom, "tenHuyen", "tenTinh", "dtTTKNTN") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4)`
+		query = `INSERT INTO public."VungTuoiTK_TiemNang_DBSCL" (geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5)`
 		t = 2
 	case "VungTuoiTK_TiemNang_DBSH":
-		query = `INSERT INTO public."VungTuoiTK_TiemNang_DBSH" (geom, "tenHuyen", "tenTinh", "dtTTKNTN") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4)`
+		query = `INSERT INTO public."VungTuoiTK_TiemNang_DBSH" (geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5)`
 		t = 2
-	case "VungTuoiTK_TiemNang_NTB":
-		query = `INSERT INTO public."VungTuoiTK_TiemNang_NTB" (geom, "tenHuyen", "tenTinh", "dtTTKNTN") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4)`
+	case "VungTuoiTK_TiemNang_NTB_TN":
+		query = `INSERT INTO public."VungTuoiTK_TiemNang_NTB_TN" (geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi") VALUES (ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)), $2, $3, $4, $5)`
 		t = 2
 	}
 
@@ -743,77 +776,77 @@ func deleteTtkn(w http.ResponseWriter, r *http.Request) {
 
 	case "VungTuoiTK_HienTrang_TDMNPB":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_TDMNPB" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_TDMNPB" WHERE Id = $1`
 	case "VungTuoiTK_HienTrang_DBSH":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_DBSH" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_DBSH" WHERE Id = $1`
 	case "VungTuoiTK_HienTrang_BTB":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, ""tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_BTB" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_BTB" WHERE Id = $1`
-	case "VungTuoiTK_HienTrang_NTB":
+	case "VungTuoiTK_HienTrang_NTB_TN":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
-				FROM public."VungTuoiTK_HienTrang_NTB" WHERE Id = $1
+				FROM public."VungTuoiTK_HienTrang_NTB_TN" WHERE Id = $1
 		`
-		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_NTB" WHERE Id = $1`
+		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_NTB_TN" WHERE Id = $1`
 	case "VungTuoiTK_HienTrang_TN":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_TN" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_TN" WHERE Id = $1`
 	case "VungTuoiTK_HienTrang_DNB":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_DNB" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_DNB" WHERE Id = $1`
 	case "VungTuoiTK_HienTrang_DBSCL":
 		query = `
-			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong")
+			INSERT INTO public."VungTuoiTK_HienTrang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKN", "cnTTKN", "nangSuat", "sanLuong"
 				FROM public."VungTuoiTK_HienTrang_DBSCL" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_HienTrang_DBSCL" WHERE Id = $1`
 	case "VungTuoiTK_TiemNang_DBSH":
 		query = `
-			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN")
+			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
 				FROM public."VungTuoiTK_TiemNang_DBSH" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_TiemNang_DBSH" WHERE Id = $1`
 	case "VungTuoiTK_TiemNang_BTB":
 		query = `
-			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN")
+			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
 				FROM public."VungTuoiTK_TiemNang_BTB" WHERE Id = $1
 		`
 		queryD = `DELETE FROM public."VungTuoiTK_TiemNang_BTB" WHERE Id = $1`
-	case "VungTuoiTK_TiemNang_NTB":
+	case "VungTuoiTK_TiemNang_NTB_TN":
 		query = `
-			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN")
+			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
-				FROM public."VungTuoiTK_TiemNang_NTB" WHERE Id = $1
+				FROM public."VungTuoiTK_TiemNang_NTB_TN" WHERE Id = $1
 		`
-		queryD = `DELETE FROM public."VungTuoiTK_TiemNang_NTB" WHERE Id = $1`
+		queryD = `DELETE FROM public."VungTuoiTK_TiemNang_NTB_TN" WHERE Id = $1`
 	case "VungTuoiTK_TiemNang_DBSCL":
 		query = `
-			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN")
+			INSERT INTO public."VungTuoiTK_TiemNang_Backup"(ref_id, geom, "tenHuyen", "tenTinh", "dtTTKNTN", "tenXaMoi")
 			SELECT id, geom, "tenHuyen", "tenTinh", "dtTTKNTN"
 				FROM public."VungTuoiTK_TiemNang_DBSCL" WHERE Id = $1
 		`
@@ -955,9 +988,9 @@ func main() {
 
 	// TTKN API
 	r.HandleFunc("/api/ttkn/excel", authenticateToken(ttknExcel)).Methods("GET")
-	r.HandleFunc("/api/ttkn/reports", authenticateToken(ttknReports)).Methods("GET")
-	r.HandleFunc("/api/ttkn/report", ttknReports).Methods("GET")
-	r.HandleFunc("/api/ttkntn/reports", authenticateToken(ttknTnReports)).Methods("GET")
+	//r.HandleFunc("/api/ttkn/reports/{tt}", authenticateToken(ttknReports)).Methods("GET")
+	r.HandleFunc("/api/ttkn/reports/{tt}", ttknReports).Methods("GET")
+	// r.HandleFunc("/api/ttkn/report", ttknReports).Methods("GET")
 
 	r.HandleFunc("/api/ttkn/ht", authenticateToken(saveHt)).Methods("POST")
 	r.HandleFunc("/api/ttkn/tn", authenticateToken(saveTn)).Methods("POST")
