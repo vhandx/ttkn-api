@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
+	"ttkn.vngis.net/services/httlhp"
+	"ttkn.vngis.net/services/tuya"
 )
 
 // Models
@@ -103,6 +105,26 @@ type TtknAdd struct {
 	} `json:"geometry"`
 }
 
+type KenhReport struct {
+	Id        string `json:"id"`
+	ObjectId  string `json:"OBJECTID"`
+	HeThong   string `json:"He_thong"`
+	TenKenh   string `json:"Ten_kenh"`
+	ChieuDai  string `json:"Chieu_dai"`
+	KTB       string `json:"KT_b"`
+	KTH       string `json:"KT_h"`
+	KTM       string `json:"KT_m"`
+	KetCau    string `json:"Ket_cau"`
+	DiemDau   string `json:"Diem_dau"`
+	DiemCuoi  string `json:"Diem_cuoi"`
+	Xa        string `json:"Xa"`
+	Huyen     string `json:"Huyen"`
+	GhiChu    string `json:"Ghi_chu"`
+	CQQL      string `json:"CQQL"`
+	SHAPELeng string `json:"SHAPE_Leng"`
+	LoaiKenh  string `json:"Loai_kenh"`
+}
+
 type LoginRequest struct {
 	UserName string `json:"username"`
 	Password string `json:"password"`
@@ -137,7 +159,7 @@ func initDB() {
 	var err error
 
 	//connStr := "user=postgis dbname=postgis sslmode=disable password=postgis host=localhost port=5432"
-	connStr := "user=postgres dbname=postgres sslmode=disable password=postgres host=localhost port=5432"
+	connStr := "user=postgres dbname=postgres sslmode=disable password=postgres host=192.168.1.99 port=5432"
 
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -149,8 +171,6 @@ func initDB() {
 	}
 
 	log.Println("Connected to database successfully")
-
-	// insertSampleData()
 }
 
 // Middleware
@@ -694,6 +714,19 @@ func saveTtkn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Update successful"})
 }
 
+func saveKenh(w http.ResponseWriter, r *http.Request) {
+	httlhp.SaveKenh(db, w, r)
+}
+
+func saveTramBom(w http.ResponseWriter, r *http.Request) {
+	httlhp.SaveTramBom(db, w, r)
+}
+
+func saveCong(w http.ResponseWriter, r *http.Request) {
+
+	httlhp.SaveCong(db, w, r)
+}
+
 func mapTtkn(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure the request method is POST
@@ -762,6 +795,18 @@ func mapTtkn(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Insert successful"})
+}
+
+func mapTramBom(w http.ResponseWriter, r *http.Request) {
+	httlhp.MapTramBom(db, w, r)
+}
+
+func mapKenh(w http.ResponseWriter, r *http.Request) {
+	httlhp.MapKenh(db, w, r)
+}
+
+func mapCong(w http.ResponseWriter, r *http.Request) {
+	httlhp.MapCong(db, w, r)
 }
 
 func deleteTtkn(w http.ResponseWriter, r *http.Request) {
@@ -968,6 +1013,51 @@ func ttknChart02(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chart)
 }
 
+func reportVbKenh(w http.ResponseWriter, r *http.Request) {
+	httlhp.ReportVbKenh(db, w, r)
+}
+
+func reportVbTramBom(w http.ResponseWriter, r *http.Request) {
+	httlhp.ReportVbTramBom(db, w, r)
+}
+
+func reportVbCong(w http.ResponseWriter, r *http.Request) {
+	httlhp.ReportVbCong(db, w, r)
+}
+
+func excelKenh(w http.ResponseWriter, r *http.Request) {
+	httlhp.ExcelKenh(db, w, r)
+}
+
+func excelTramBom(w http.ResponseWriter, r *http.Request) {
+	httlhp.ExcelTramBom(db, w, r)
+}
+
+func excelCong(w http.ResponseWriter, r *http.Request) {
+	httlhp.ExcelCong(db, w, r)
+}
+
+func handlerSensorTuya(w http.ResponseWriter, r *http.Request) {
+	globalCache := &tuya.DeviceCache{}
+
+	tuyaClient := tuya.NewTuyaClient(
+		"https://openapi-sg.iotbing.com",
+		"8rn4dxhs58nhd5cchuca",
+		"81138006b92849829e67b599fd7831ed",
+		"a3e50f3b070c103157p2at",
+	)
+
+	go tuya.StartTuyaWorker(globalCache, tuyaClient)
+	/*
+		a333a34fbb9fb0f4cajf6e	=> Terrace Sensor
+		a39b3a62a76d962987ohkr	=> 4F Sensor
+		a340a630ea623d96d1gk5h	=> 4F Fan
+		a3e50f3b070c103157p2at	=> AirBox
+	*/
+	// Truyền tuyaClient vào worker chạy ngầm
+	tuya.SseSensorTuyaHandler(globalCache, w, r)
+}
+
 func main() {
 
 	// Initialize database
@@ -999,11 +1089,30 @@ func main() {
 	r.HandleFunc("/api/ttkn", authenticateToken(saveTtkn)).Methods("POST")
 	r.HandleFunc("/api/map", authenticateToken(mapTtkn)).Methods("POST")
 
+	r.HandleFunc("/api/httlhp/map/kenh", authenticateToken(mapKenh)).Methods("POST")
+	r.HandleFunc("/api/httlhp/map/trambom", authenticateToken(mapTramBom)).Methods("POST")
+
 	r.HandleFunc("/api/ttkn/{id}", authenticateToken(deleteTtkn)).Methods("DELETE")
+
+	r.HandleFunc("/api/httlhp/kenh", authenticateToken(saveKenh)).Methods("POST")
+	r.HandleFunc("/api/httlhp/trambom", authenticateToken(saveTramBom)).Methods("POST")
+
+	r.HandleFunc("/api/httlhp/report/kenh", reportVbKenh).Methods("GET")
+	r.HandleFunc("/api/httlhp/report/trambom", reportVbTramBom).Methods("GET")
+
+	r.HandleFunc("/api/httlhp/excel/kenh", authenticateToken(excelKenh)).Methods("GET")
+	r.HandleFunc("/api/httlhp/excel/trambom", authenticateToken(excelTramBom)).Methods("GET")
 
 	//Chart
 	r.HandleFunc("/api/ttkn/chart01", ttknChart01).Methods("GET")
 	r.HandleFunc("/api/ttkn/chart02", ttknChart02).Methods("GET")
+
+	r.HandleFunc("/api/httlhp/map/cong", authenticateToken(mapCong)).Methods("POST")
+	r.HandleFunc("/api/httlhp/cong", authenticateToken(saveCong)).Methods("POST")
+	r.HandleFunc("/api/httlhp/report/cong", reportVbCong).Methods("GET")
+	r.HandleFunc("/api/httlhp/excel/cong", authenticateToken(excelCong)).Methods("GET")
+
+	r.HandleFunc("/sse/sensor-tuya", handlerSensorTuya)
 
 	// Apply CORS middleware
 	handler := enableCORS(r)
